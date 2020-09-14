@@ -27,4 +27,39 @@ router.post("/incomes/id", auth, async (req,res) => {
     }
 })
 
+router.delete("/incomes/id", auth, async (req,res) => {
+    try{
+        const { _id } = req.headers;
+        const income = await Income.findOneAndDelete({_id, userId: req.user._id})
+        if(!income){
+            return res.status(404).send()
+        }
+        res.send("Income Deleted " + income);
+    }catch(err){
+        res.status(500).send();
+    }
+})
+
+router.patch( "/incomes/id", auth, async (req,res) => {
+    const { _id } = req.body;
+    const body = req.body;
+    const updates = Object.keys( body );
+    try{
+        const income = await Income.findOne( {_id, userId: req.user._id } );
+        if(!income){
+            return res.status(404).send()
+        }
+
+        updates.forEach( (update) => income[update] = body[update] )
+
+        await income.save()
+
+        res.send(income)
+
+    }catch(e){
+        res.status(500).send();
+    }
+} )
+
+
 module.exports = router;
